@@ -1,5 +1,5 @@
 {
-  "manifest_version": 4,
+  "manifest_version": 3,
   "name": "Hello Extensions",
   "description": "Base Level Extension",
   "version": "1.0",
@@ -15,10 +15,13 @@
     "activeTab",
     "scripting",
     "tabs",
-    "storage"
+    "storage",
+    "background",
+    "https://www.youtube.com/*"
   ],
   "host_permissions": [
-    "https://m.youtube.com/*"
+    "https://m.youtube.com/*",
+    "https://www.youtube.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -26,7 +29,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://m.youtube.com/*"
+        "https://m.youtube.com/*",
+        "https://www.youtube.com/*"
       ],
       "js": [
         "content_script.js",

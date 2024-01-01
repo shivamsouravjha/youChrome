@@ -28,7 +28,27 @@ function handlePlayerControl(action) {
     }
 }
 
-// Listen for messages from the popup
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    handlePlayerControl(request.action);
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.action === "requestVideoDetails") {
+  
+    } else {
+        handlePlayerControl(request.action);
+
+    }
 });
+
+function fetchAndSendVideoDetails() {
+    const title = document.querySelector('h1.ytd-watch-metadata')?.textContent.trim();
+    const channel = document.querySelector('a.yt-simple-endpoint.style-scope.yt-formatted-string')?.textContent.trim();
+    console.log(title,"adssadsa")
+    chrome.runtime.sendMessage({ title: title, channel: channel });
+
+    // chrome.runtime.sendMessage({ title: title, channel: channel });.
+
+}
+const observer = new MutationObserver(fetchAndSendVideoDetails);
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Also send details when the script is first loaded
+fetchAndSendVideoDetails();
+
