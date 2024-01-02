@@ -16,8 +16,7 @@
     "scripting",
     "tabs",
     "storage",
-    "background",
-    "https://www.youtube.com/*"
+    "background"
   ],
   "host_permissions": [
     "https://m.youtube.com/*",

@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('video-channel').textContent = channel;
     }
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        console.log("tits")
         if (message.title && message.channel) {
             updatePopup(message.title, message.channel);
         }

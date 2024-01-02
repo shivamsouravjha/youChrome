@@ -1,29 +1,66 @@
-let prevVideoID;
-let videoId;
-let params;
-let refrestParams = () => {
-    let userSearchParams = new URLSearchParams(window.location.search);
-    params = Object.fromEntries(userSearchParams.entries())
-    videoId = window.location.pathname == "/watch" ? params.v : undefined;
+let lastVideoID = null;
 
+function getYouTubeVideoID(url) {
+    const parsedUrl = new URL(url);
+    return parsedUrl.searchParams.get("v");
 }
-let lsat = location.href;
 
-let performCheck = () => {
-    console.log(`shivam ${videoId}`)
+function getVideoID(currentVideo) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get(currentVideo, function (result) {
+            if (chrome.runtime.lastError) {
+                reject(new Error('Extension context invalidated.'));
+            } else if (result[currentVideo]) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
 }
-new MutationObserver(() => {
-    let url = location.href;
-    // console.log(`what is here ${url}`)
-    if (url != lsat) {
-        lsat = url;
-        refrestParams();
-        if (videoId !== prevVideoID) {
-            prevVideoID = videoId;
-            performCheck();
+
+function setVideoID(currentVideo) {
+    const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+    const expiry = Date.now() + oneDayInMilliseconds;
+    chrome.storage.local.set({ [currentVideo]: "played", expiry: expiry }, function () {
+        if (chrome.runtime.lastError) {
+            console.error(new Error('Extension context invalidated.'));
+        } else {
+            console.log('Value is set to ' + currentVideo);
         }
-    }
-}).observe(document,{subtree:true,childList:true})
+    });
+}
+// function sendPlayerControlMessage(action) {
+//     chrome.runtime.sendMessage({ action: action });
+// }
 
-refrestParams();
-performCheck();
+function performActionForNewVideo(videoID) {
+    // if (!currentVideo || adPlaying || currentVideo === lastVideoID) return;
+    getVideoID(videoID).then(videoPlayed => {
+        if (!videoPlayed) {
+            setVideoID(videoID);
+        } else {
+            const nextButton = document.querySelector('.ytp-next-button');
+            if (nextButton) {
+                chrome.runtime.sendMessage({ action: 'next' });
+                chrome.runtime.sendMessage({ action: 'next' });
+            }
+        }
+    }).catch(error => {
+        console.error(error);
+    });
+};
+
+function checkForNewVideo() {
+    const currentVideoID = getYouTubeVideoID(window.location.href);
+    console.log(currentVideoID && currentVideoID !== lastVideoID)
+    if (currentVideoID && currentVideoID !== lastVideoID) {
+        lastVideoID = currentVideoID;
+        performActionForNewVideo(currentVideoID);
+    }
+}
+
+const contentObserver = new MutationObserver(checkForNewVideo);
+
+contentObserver.observe(document, { subtree: true, childList: true });
+checkForNewVideo()

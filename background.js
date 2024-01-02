@@ -41,7 +41,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ status: 'success', message: 'Command executed' });
     } else if (message.from === 'content') {
         chrome.runtime.sendMessage(message);
+    }else if (message && message.action === 'next') {
+        // Handle the 'next' action here.
+        // If you need to trigger a function in the content script, you can use sendMessage.
+        // Example: Sending a message back to the content script to click the next button.
+        if (sender.tab && sender.tab.id) {
+            chrome.tabs.sendMessage(sender.tab.id, { action: 'next' });
+        }
 
+        sendResponse({ status: 'success', message: 'Next video action processed.' });
     }
 
     // Return true to indicate that you will send a response asynchronously.
