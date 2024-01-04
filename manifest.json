@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Hello Extensions",
-  "description": "Base Level Extension",
+  "name": "YouChrome",
+  "description": "Extension to skip repeating videos for 24 hours",
   "version": "1.0",
   "action": {
     "default_popup": "popup.html",

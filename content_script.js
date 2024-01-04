@@ -35,7 +35,6 @@ function setVideoID(currentVideo) {
 // }
 
 function performActionForNewVideo(videoID) {
-    // if (!currentVideo || adPlaying || currentVideo === lastVideoID) return;
     getVideoID(videoID).then(videoPlayed => {
         if (!videoPlayed) {
             setVideoID(videoID);
@@ -53,7 +52,6 @@ function performActionForNewVideo(videoID) {
 
 function checkForNewVideo() {
     const currentVideoID = getYouTubeVideoID(window.location.href);
-    console.log(currentVideoID && currentVideoID !== lastVideoID)
     if (currentVideoID && currentVideoID !== lastVideoID) {
         lastVideoID = currentVideoID;
         performActionForNewVideo(currentVideoID);

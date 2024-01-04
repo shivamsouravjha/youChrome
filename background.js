@@ -1,22 +1,33 @@
-// This runs when the extension is installed or updated.
-chrome.runtime.onInstalled.addListener(() => {
-    console.log('Extension installed or updated');
-    // Initialization code goes here (e.g., setting up initial storage values).
-});
+let extensionEnabled = true; // Default state of the extension
+
+// Function to initialize or fetch the state
+function initializeState() {
+    console.log("Initializing state...");
+    chrome.storage.sync.get('extensionEnabled', function(data) {
+        if (data.hasOwnProperty('extensionEnabled')) {
+            extensionEnabled = data.extensionEnabled;
+        } else {
+            chrome.storage.sync.set({extensionEnabled: true});
+        }
+        console.log(`Extension initialized with state: ${extensionEnabled}`);
+    });
+}
+
+// Initialize state when the extension is installed or the browser starts
+chrome.runtime.onInstalled.addListener(initializeState);
+chrome.runtime.onStartup.addListener(initializeState);
 
 // This runs when the user clicks the extension icon.
 chrome.action.onClicked.addListener((tab) => {
-    // Check if the current tab is a YouTube video page.
     if (tab.url && tab.url.includes('youtube.com/watch')) {
-        // Inject the content script into the current page.
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
             files: ['content.js']
         }, (injectionResults) => {
-            // This callback is called after the script has been injected.
-            // You can handle any post-injection logic here if necessary.
             if (chrome.runtime.lastError) {
                 console.error('Script injection failed: ', chrome.runtime.lastError.message);
+            } else {
+                console.log('Content script injected successfully.');
             }
         });
     } else {
@@ -24,35 +35,39 @@ chrome.action.onClicked.addListener((tab) => {
     }
 });
 
-// Listen for messages from content scripts or popup.
+// Listen for messages from content scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // Process the message.
-    if (message && message.type === 'command') {
+    if (message.type === 'checkStatus') {
+        sendResponse({extensionEnabled: extensionEnabled});
+    } else if (message.toggleExtension) {
+        extensionEnabled = message.toggleExtension === 'enable';
+        chrome.storage.sync.set({extensionEnabled: extensionEnabled}, () => {
+            if (chrome.runtime.lastError) {
+                console.error(`Error setting state: ${chrome.runtime.lastError}`);
+                sendResponse({ status: 'error', message: chrome.runtime.lastError.message });
+            } else {
+                console.log(`Extension state updated: ${extensionEnabled}`);
+                sendResponse({ status: 'success', message: 'Extension state toggled.' });
+            }
+        });
+        return true; 
+    }else if (message && message.type === 'command') {
         console.log('Received command:', message.command);
-
-        // Add your command handling logic here.
-        // For example, if you're expecting to receive a "nextVideo" command:
         if (message.command === 'nextVideo') {
-            // Code to trigger going to the next video.
-            // You might need to send a message to content.js to perform a click on the next button.
         }
-
-        // Send a response back to the sender if necessary.
         sendResponse({ status: 'success', message: 'Command executed' });
     } else if (message.from === 'content') {
         chrome.runtime.sendMessage(message);
     }else if (message && message.action === 'next') {
-        // Handle the 'next' action here.
-        // If you need to trigger a function in the content script, you can use sendMessage.
-        // Example: Sending a message back to the content script to click the next button.
         if (sender.tab && sender.tab.id) {
             chrome.tabs.sendMessage(sender.tab.id, { action: 'next' });
         }
-
         sendResponse({ status: 'success', message: 'Next video action processed.' });
     }
-
-    // Return true to indicate that you will send a response asynchronously.
-    // This is necessary if the response will not be sent immediately.
-    return true;
 });
+
+function toggleExtensionState() {
+    extensionEnabled = !extensionEnabled;
+    console.log(`Extension state toggled to: ${extensionEnabled}`);
+    chrome.storage.sync.set({extensionEnabled: extensionEnabled});
+}
