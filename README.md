@@ -4,6 +4,9 @@
 
 **Skip-Replay Music Extension** is an innovative browser extension designed for music enthusiasts. It enhances the music listening experience by preventing the repetition of songs within a 24-hour period, ensuring a fresh and diverse playlist every day.
 
+## Install the extension
+[Visit the link to install the extension](https://chromewebstore.google.com/detail/youchrome/giifjdcifeofmjefgollmcbbgpkbcfop?hl=en)
+
 ## Features
 
 ### User Convenience
