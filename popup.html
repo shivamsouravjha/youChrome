@@ -26,8 +26,18 @@
                 <input type="checkbox" id="toggle-extension" checked>
                 <span class="slider round"></span>
             </label>
+            <div class="button-container">
+                <button onclick="clearCache()">Forget history</button>
+            </div>
         </div>
     </div>
+    <script>
+        function clearCache() {
+            localStorage.clear();
+            alert("Cache cleared!");
+        }
+    </script>
+    
     <script src="popup.js"></script>
 </body>
 

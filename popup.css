@@ -11,6 +11,9 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     width: 300px;
 }
+.button-container {
+  margin-left: auto; /* Push the button container to the right */
+}
 
 .header {
     display: flex;

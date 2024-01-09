@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Request video details from the content script
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        console.log("Adasd")
         chrome.tabs.sendMessage(tabs[0].id, { action: "requestVideoDetails" });
     });
 
